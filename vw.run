@@ -1,0 +1,33 @@
+#Multiclass Classification
+rm -f ./data/vw/*
+
+python vw_train.py
+
+# Error Correcting 
+../vendor/vowpal_wabbit/vowpalwabbit/vw data/vw/train.dat -c -k --passes 300 --ngram 7 -b 24 --ect 5 -f ./data/vw/multi.model
+../vendor/vowpal_wabbit/vowpalwabbit/vw ./data/vw/test.dat -t -i ./data/vw/multi.model -p ./data/vw/multi.pred
+
+#Neural Networks
+../vendor/vowpal_wabbit/vowpalwabbit/vw data/vw/train.dat --nn 100 --ngram 7 -b 24 --ect 5 -f ./data/vw/multi.model
+../vendor/vowpal_wabbit/vowpalwabbit/vw ./data/vw/test.dat --nn 100 -t -i ./data/vw/multi.model -p ./data/vw/multi.pred
+
+awk 'BEGIN{print "PhraseId,Sentiment"} //{printf "%d,%d\n", $2,$1-1}' ./data/vw/multi.pred > ./data/vw/multi.out
+
+#Binary Classification
+rm -f ./data/vw/*
+
+python vw_train.py
+
+../vendor/vowpal_wabbit/vowpalwabbit/vw -d data/vw/train0.dat -c -k --loss_function hinge --passes 300 --ngram 4 -b 24 -f ./data/vw/train0.model
+../vendor/vowpal_wabbit/vowpalwabbit/vw -d data/vw/train1.dat -c -k --loss_function hinge --passes 300 --ngram 4 -b 24 -f ./data/vw/train1.model
+../vendor/vowpal_wabbit/vowpalwabbit/vw -d data/vw/train2.dat -c -k --loss_function hinge --passes 300 --ngram 4 -b 24 -f ./data/vw/train2.model
+../vendor/vowpal_wabbit/vowpalwabbit/vw -d data/vw/train3.dat -c -k --loss_function hinge --passes 300 --ngram 4 -b 24 -f ./data/vw/train3.model
+../vendor/vowpal_wabbit/vowpalwabbit/vw -d data/vw/train4.dat -c -k --loss_function hinge --passes 300 --ngram 4 -b 24 -f ./data/vw/train4.model
+
+../vendor/vowpal_wabbit/vowpalwabbit/vw ./data/vw/test.dat -t -i ./data/vw/train0.model -p ./data/vw/test0.pred
+../vendor/vowpal_wabbit/vowpalwabbit/vw ./data/vw/test.dat -t -i ./data/vw/train1.model -p ./data/vw/test1.pred
+../vendor/vowpal_wabbit/vowpalwabbit/vw ./data/vw/test.dat -t -i ./data/vw/train2.model -p ./data/vw/test2.pred
+../vendor/vowpal_wabbit/vowpalwabbit/vw ./data/vw/test.dat -t -i ./data/vw/train3.model -p ./data/vw/test3.pred
+../vendor/vowpal_wabbit/vowpalwabbit/vw ./data/vw/test.dat -t -i ./data/vw/train4.model -p ./data/vw/test4.pred
+
+python vw_pred.py > ./data/vw/binary_svm.out

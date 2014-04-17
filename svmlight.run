@@ -1,0 +1,40 @@
+rm -f ./data/svmlight/*
+
+python svmlight_train.py
+
+# Training
+../vendor/svm_light/svm_learn -t 1 -d 5 -# 100  -c 0.01 ./data/svmlight/train0.dat ./data/svmlight/train0.model
+../vendor/svm_light/svm_learn -t 1 -d 5 -# 100  -c 0.01 ./data/svmlight/train1.dat ./data/svmlight/train1.model
+../vendor/svm_light/svm_learn -t 1 -d 5 -# 100  -c 0.01 ./data/svmlight/train2.dat ./data/svmlight/train2.model
+../vendor/svm_light/svm_learn -t 1 -d 5 -# 100  -c 0.01 ./data/svmlight/train3.dat ./data/svmlight/train3.model
+../vendor/svm_light/svm_learn -t 1 -d 5 -# 100  -c 0.01 ./data/svmlight/train4.dat ./data/svmlight/train4.model
+
+# Validation
+../vendor/svm_light/svm_classify ./data/svmlight/val_train.dat ./data/svmlight/train0.model ./data/svmlight/val0.pred
+../vendor/svm_light/svm_classify ./data/svmlight/val_train.dat ./data/svmlight/train1.model ./data/svmlight/val1.pred
+../vendor/svm_light/svm_classify ./data/svmlight/val_train.dat ./data/svmlight/train2.model ./data/svmlight/val2.pred
+../vendor/svm_light/svm_classify ./data/svmlight/val_train.dat ./data/svmlight/train3.model ./data/svmlight/val3.pred
+../vendor/svm_light/svm_classify ./data/svmlight/val_train.dat ./data/svmlight/train4.model ./data/svmlight/val4.pred
+
+awk '{print $1}' ./data/svmlight/val_test.dat > ./data/svmlight/val_phraseids.dat
+paste -d" "  ./data/svmlight/val_phraseids.dat ./data/svmlight/val0.pred ./data/svmlight/val1.pred ./data/svmlight/val2.pred ./data/svmlight/val3.pred ./data/svmlight/val4.pred > ./data/svmlight/val.pred
+
+python svmlight_pred.py ./data/svmlight/val.pred > ./data/svmlight/val.out
+join ./data/svmlight/val_test.dat ./data/svmlight/val.out | awk '{if($2 == $3) print $2}' -|wc -l
+join ./data/svmlight/val_test.dat ./data/svmlight/val.out | wc -l
+
+
+# Test Prediction
+../vendor/svm_light/svm_classify ./data/svmlight/test.dat ./data/svmlight/train0.model ./data/svmlight/test0.pred
+../vendor/svm_light/svm_classify ./data/svmlight/test.dat ./data/svmlight/train1.model ./data/svmlight/test1.pred
+../vendor/svm_light/svm_classify ./data/svmlight/test.dat ./data/svmlight/train2.model ./data/svmlight/test2.pred
+../vendor/svm_light/svm_classify ./data/svmlight/test.dat ./data/svmlight/train3.model ./data/svmlight/test3.pred
+../vendor/svm_light/svm_classify ./data/svmlight/test.dat ./data/svmlight/train4.model ./data/svmlight/test4.pred
+
+awk 'NR>=2 {print $1}' ./data/test.tsv > ./data/svmlight/test_phraseids.dat
+
+paste -d" " ./data/svmlight/test_phraseids.dat ./data/svmlight/test0.pred ./data/svmlight/test1.pred ./data/svmlight/test2.pred ./data/svmlight/test3.pred ./data/svmlight/test4.pred > ./data/svmlight/test.pred
+
+python svmlight_pred.py ./data/svmlight/test.pred > ./data/svmlight/test.out
+
+
