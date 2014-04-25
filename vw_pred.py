@@ -8,6 +8,6 @@ pred4_reader = csv.reader(open('data/vw/test4.pred'), delimiter=' ')
 
 print "PhraseId,Sentiment"
 for (row0, row1, row2, row3, row4) in zip(pred0_reader, pred1_reader, pred2_reader, pred3_reader, pred4_reader):
-	pred = [row0[0], row1[0], row2[0], row3[0], row4[0]]
-	# print pred
-	print str(row0[1]) + "," + str(pred.index(max(pred)))
+    pred = [row0[0], row1[0], row2[0], row3[0], row4[0]]
+    # print pred
+    print str(row0[1]) + "," + str(pred.index(max(pred)))
